@@ -25,18 +25,18 @@ local sum = result_dict:get(request_time_var) or 0
 sum = sum + request_time
 result_dict:set(request_time_var, sum)
 
----- 单个uri count 统计
+---- 单个uri count 和time 统计
 local request_uri = result_dict:get(uri) or 0
         local newval, err = result_dict:incr(uri, 1)
+        request_time_var = uri.."_reqtimesum"
+
+        local request_time = tonumber(ngx.var.request_time)
+        local sum = result_dict:get(request_time_var) or 0
+        sum = sum + request_time
+        result_dict:set(request_time_var, sum)
+
         if not newval and err == "not found" then
             result_dict:add(uri, 0)
             result_dict:incr(uri, 1)
         end
----end
----单个uri time 统计
----local help_api = host.."_/api/help/version"
----local request_time_api = tonumber(ngx.var.upstream_response_time)
----local api_time = result_dict:get(help_api) or 0
----  api_time = api_time + request_time_api
----  result_dict:set(help_api,api_time)
 
