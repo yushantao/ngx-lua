@@ -3,6 +3,7 @@ local log_dict = ngx.shared.log_dict
 local result_dict = ngx.shared.result_dict
 local result_status_dict = ngx.shared.result_status_dict
 local result_api_dict = ngx.shared.result_api_dict
+local result_domain_dict = ngx.shared.result_domain_dict
 local cjson = require "cjson"
 local args = ngx.req.get_uri_args()
 local host = ngx.var.host
@@ -10,11 +11,10 @@ local uri = ngx.var.uri
 local request_time = ngx.var.request_time
 local body_bytes_sent = ngx.var.body_bytes_sent
 ---- 请求次数统计, count
-query_nb_var = host.."_count"
-local newval, err = result_dict:incr(query_nb_var, 1)
+local newval, err = result_domain_dict:incr(host, 1)
 if not newval and err == "not found" then
-    result_dict:add(query_nb_var, 0)
-    result_dict:incr(query_nb_var, 1)
+    result_domain_dict:add(host, 0)
+    result_domain_dict:incr(host, 1)
 end
 
 ---- request_time统计, counte
@@ -57,12 +57,10 @@ end
 
 ---- 状态码统计, 2xx,4xx, 5xx, counter
 local status_code = tonumber(ngx.var.status)
-status_code_var = host.."_status_code_"..status_code.."_counte"
-
-        local newval, err = result_status_dict:incr(status_code_var, 1)
+        local newval, err = result_status_dict:incr(status_code, 1)
         if not newval and err == "not found" then
-            result_status_dict:add(status_code_var, 0)
-            result_status_dict:incr(status_code_var, 1)
+            result_status_dict:add(status_code, 0)
+            result_status_dict:incr(status_code, 1)
         end
 
 
