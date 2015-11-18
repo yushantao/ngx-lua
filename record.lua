@@ -1,6 +1,8 @@
 ---- log_dict做临时记录用 result_dict记录最终需要采集的数据
 local log_dict = ngx.shared.log_dict
 local result_dict = ngx.shared.result_dict
+local result_status_dict = ngx.shared.result_status_dict
+local result_api_dict = ngx.shared.result_api_dict
 local cjson = require "cjson"
 local args = ngx.req.get_uri_args()
 local host = ngx.var.host
@@ -53,34 +55,15 @@ if body_byte_sent >= 1048576 and host == "img1.cdn.daling.com" then
 	result_dict:set(body_byte_var,body_byte_sent)
 end
 
+---- 状态码统计, 2xx,4xx, 5xx, counter
+local status_code = tonumber(ngx.var.status)
+status_code_var = host.."_status_code_"..status_code.."_counte"
 
----- uri 队列插入request_time
-
----local Que = {first=0,last=0}
----function Que:push(value)
----    local last = self.last
----    self[last] = value
----    self.last = last+1
----end
----function Que:pop()
----    if self.first == self.last then
-------        ngx.say("队列空")
----        return nil
----    end
----    local first = self.first
----    self.first = first+1
----    return self[first]
----end
----function Que:showValue()
----    for i=self.first,self.last-1 do
-------        ngx.say("value:"..self[i])
----    end
----end
----Que:push(2)
----Que:push(3)
-
-
-
+        local newval, err = result_status_dict:incr(status_code_var, 1)
+        if not newval and err == "not found" then
+            result_status_dict:add(status_code_var, 0)
+            result_status_dict:incr(status_code_var, 1)
+        end
 
 
 ---uri count and sum time
