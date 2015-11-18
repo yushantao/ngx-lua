@@ -6,13 +6,23 @@ local args = ngx.req.get_uri_args()
 local host = ngx.var.host
 local uri = ngx.var.uri
 local request_time = ngx.var.request_time
----- 请求次数统计, counter
+local body_bytes_sent = ngx.var.body_bytes_sent
+---- 请求次数统计, count
 query_nb_var = host.."_count"
 local newval, err = result_dict:incr(query_nb_var, 1)
 if not newval and err == "not found" then
     result_dict:add(query_nb_var, 0)
     result_dict:incr(query_nb_var, 1)
 end
+
+---- request_time统计, counte
+if string.find(uri,"(api)") then
+request_time_var = host.."_reqtimesum"
+local request_time = tonumber(ngx.var.request_time)
+local sum = result_dict:get(request_time_var) or 0
+sum = sum + request_time
+result_dict:set(request_time_var, sum)
+
 ---- uri 请求次数
 query_var=host..uri.."count"
 local request_uri = result_dict:get(uri) or 0
@@ -21,18 +31,31 @@ local request_uri = result_dict:get(uri) or 0
             result_dict:add(query_var, 0)
             result_dict:incr(query_var, 1)
      	end
+
 ---- uri 请求总时间
         request_time_var = host..uri.."_reqtimesum"
         local request_time = tonumber(ngx.var.upstream_response_time)
         local sum = result_dict:get(request_time_var) or 0
         sum = sum + request_time
         result_dict:set(request_time_var,sum)
+
 ---- uri 平均请求时间
 request_avg_time = uri.."avgtime"
 local avg = result_dict:get(request_avg_time) or 0
 local count = result_dict:get(query_var)
     avg = sum/count
     result_dict:set(request_avg_time,avg)
+end
+---- 传输字节
+local body_byte_sent = tonumber(ngx.var.body_bytes_sent)
+body_byte_var = host..uri.."body-byte"
+if body_byte_sent >= 1048576 and host == "img1.cdn.daling.com" then
+	result_dict:set(body_byte_var,body_byte_sent)
+end
+
+
+---- uri 队列插入request_time
+
 ---local Que = {first=0,last=0}
 ---function Que:push(value)
 ---    local last = self.last
@@ -76,9 +99,3 @@ local count = result_dict:get(query_var)
 ---            result_dict:incr(uri, 1)
 ---        end
 ---end
----- request_time统计, counter
----request_time_var = host.."_reqtimesum"
----local request_time = tonumber(ngx.var.request_time)
----local sum = result_dict:get(request_time_var) or 0
----sum = sum + request_time
----result_dict:set(request_time_var, sum)
