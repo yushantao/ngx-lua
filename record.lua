@@ -3,6 +3,7 @@ local result_reqtime_dict = ngx.shared.result_reqtime_dict
 local result_status_dict = ngx.shared.result_status_dict
 local result_domain_dict = ngx.shared.result_domain_dict
 local result_api_dict = ngx.shared.result_api_dict
+local result_host_dict = ngx.shared.result_host_dict
 
 local cjson = require "cjson"
 local host = ngx.var.host
@@ -42,10 +43,22 @@ local request_uri = result_uri_count_dict:get(uri) or 0
         result_reqtime_dict:set(request_time_var,sum)
 
 
-
+----url:encode json
 local obj = {
 count = result_uri_count_dict:get(query_var),
 sum = result_reqtime_dict:get(request_time_var),
 }
 local str = cjson.encode(obj)
 result_api_dict:set(uri,str)
+
+
+----host: encode json
+local hostobj = {
+	result_api_dict:get(uri)
+}
+local pstr= cjson.encode(hostobj)
+result_host_dict:set(host,pstr)
+
+
+
+
