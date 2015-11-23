@@ -5,6 +5,7 @@ local result_domain_dict = ngx.shared.result_domain_dict
 local result_api_dict = ngx.shared.result_api_dict
 local result_host_dict = ngx.shared.result_host_dict
 
+
 local cjson = require "cjson"
 local host = ngx.var.host
 local uri = ngx.var.uri
@@ -52,13 +53,12 @@ local str = cjson.encode(obj)
 result_api_dict:set(uri,str)
 
 
-----host: encode json
+----uri how to variable 
 local hostobj = {
-	result_api_dict:get(uri)
+    uri,
+   obj = result_api_dict:get(str),
+
 }
 local pstr= cjson.encode(hostobj)
-result_host_dict:set(host,pstr)
-
-
-
+result_host_dict:set(host,uri,pstr)
 

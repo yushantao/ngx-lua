@@ -45,6 +45,6 @@ end
   res["api"] = apit
   jstr = cjson.encode(res)
   ngx.say(jstr)
-  total["path"]=host
+  total["path"]= host
   pstr = cjson.encode(total)
   ngx.say(pstr)
