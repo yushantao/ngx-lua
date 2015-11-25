@@ -9,6 +9,7 @@ local result_size_dict = ngx.shared.result_size_dict
 local cjson = require "cjson"
 local host = ngx.var.host
 local uri = ngx.var.uri
+local status = ngx.var.status
 local request_time = ngx.var.upstream_response_time
 local body_bytes_sent = ngx.var.body_bytes_sent
 ---- 请求次数统计, count
@@ -19,11 +20,13 @@ if not newval and err == "not found" then
 end
 ---- 状态码统计, 2xx,4xx, 5xx, counter
 local status_code = tonumber(ngx.var.status)
-        local newval, err = result_status_dict:incr(status_code, 1)
+status_code_var = host..uri..status_code
+        local newval, err = result_status_dict:incr(status_code_var, 1)
         if not newval and err == "not found" then
-            result_status_dict:add(status_code, 0)
-            result_status_dict:incr(status_code, 1)
+            result_status_dict:add(status_code_var, 0)
+            result_status_dict:incr(status_code_var, 1)
         end
+
 
 ---- uri 请求次数
 if string.find(uri,"(api)") then
@@ -56,3 +59,11 @@ body_byte_var = uri.."body-byte"
 if body_bytes_sent >= 1048569 then
 	result_size_dict:set(body_byte_var,body_bytes_sent)
 end
+
+----tree new bee
+---local obj = {
+---count = result_domain_dict:get(host),
+---sum = result_reqtime_dict:get(request_time_var),
+---}
+---local str = cjson.encode(obj)
+---result_api_dict:set(uri,str)
