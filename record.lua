@@ -53,6 +53,6 @@ end
 local body_bytes_sent = tonumber(ngx.var.body_bytes_sent)
 local sent = result_size_dict:get(body_bytes_sent) or 12
 body_byte_var = uri.."body-byte"
-if body_bytes_sent >= "1048" then
+if body_bytes_sent >= 1048569 then
 	result_size_dict:set(body_byte_var,body_bytes_sent)
 end
