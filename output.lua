@@ -2,8 +2,8 @@
 local res = {}
 local status = {}
 local domain = {}
-local uricount = {}
-local reqtime = {}
+---local uricount = {}
+---local reqtime = {}
 local apit = {}
 local size = {}
 local jstr
@@ -22,9 +22,9 @@ end
 for k,v in pairs(result_domain_dict:get_keys())do
   domain[v] = result_domain_dict:get(v)
 end
-for k,v in pairs(result_uri_count_dict:get_keys())do
-  uricount[v] = result_uri_count_dict:get(v)
-end
+---for k,v in pairs(result_uri_count_dict:get_keys())do
+---  uricount[v] = result_uri_count_dict:get(v)
+---end
 ---for k,v in pairs(result_reqtime_dict:get_keys())do
 ---  reqtime[v] = result_reqtime_dict:get(v)
 ---end
@@ -36,9 +36,9 @@ for k,v in pairs(result_size_dict:get_keys())do
 end
   res["status"]= status
   res["domain"]= domain
-  res["uricount"]= uricount
+---  res["uricount"]= uricount
 ---  res["reqtime"]= reqtime
   res["api"] = apit
-  res["size"] = size
+---  res["size"] = size
   jstr = cjson.encode(res)
   ngx.say(jstr)
