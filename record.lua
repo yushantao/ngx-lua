@@ -20,11 +20,11 @@ if not newval and err == "not found" then
 end
 ---- 状态码统计, 2xx,4xx, 5xx, counter
 local status_code = tonumber(ngx.var.status)
-status_code_var = host..uri..status_code
-        local newval, err = result_status_dict:incr(status_code_var, 1)
+---status_code_var = host..uri..status_code
+        local newval, err = result_status_dict:incr(status_code, 1)
         if not newval and err == "not found" then
-            result_status_dict:add(status_code_var, 0)
-            result_status_dict:incr(status_code_var, 1)
+            result_status_dict:add(status_code, 0)
+            result_status_dict:incr(status_code, 1)
         end
 
 
