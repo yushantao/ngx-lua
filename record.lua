@@ -27,7 +27,6 @@ local status_code = tonumber(ngx.var.status)
             result_status_dict:incr(status_code, 1)
         end
 
-
 ---- uri 请求次数
 if string.find(uri,"(api)") then
 query_var=host..uri.."_count"
@@ -40,7 +39,7 @@ local request_uri = result_uri_count_dict:get(uri) or 0
 
 ---- uri 请求总时间
         request_time_var =host..uri.."_reqtimesum"
-        local request_time = tonumber(ngx.var.upstream_response_time)
+        local request_time = tonumber(ngx.var.upstream_response_time) or 0
         local sum = result_reqtime_dict:get(request_time_var) or 0
         sum = sum + request_time
         result_reqtime_dict:set(request_time_var,sum,10)

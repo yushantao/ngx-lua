@@ -36,9 +36,9 @@ for k,v in pairs(result_size_dict:get_keys())do
 end
   res["status"]= status
   res["domain"]= domain
----  res["uricount"]= uricount
----  res["reqtime"]= reqtime
+  res["uricount"]= uricount
+  res["reqtime"]= reqtime
   res["api"] = apit
----  res["size"] = size
+  res["size"] = size
   jstr = cjson.encode(res)
   ngx.say(jstr)
