@@ -1,0 +1,61 @@
+local redis = require "resty.redis"
+local cjson = require "cjson"
+
+---local config = require "config"
+
+ngx.header["Content-Type"] = "application/json; charset=utf-8"
+
+local args = ngx.req.get_uri_args(1000)
+if ngx.var.request_method == "POST" then
+    ngx.req.read_body()
+    for key, val in pairs(ngx.req.get_post_args(1000)) do
+        args[key] = val
+    end
+end
+ngx.say(args)
+---if type(args["packages"]) == "string" then
+---    args["packages"] = {args["packages"]}
+---end
+---
+---if type(args["packages"]) ~= "table" then
+---    ngx.exit(ngx.HTTP_BAD_REQUEST)
+---end
+---
+---local cache = redis.new()
+---
+---local res, err = cache:connect("127.0.0.1", "6379")
+---if not res then
+---    ngx.log(ngx.ERR, "error: ", err)
+---    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+---end
+---
+---cache:init_pipeline()
+---
+---local packages = {}
+---for _, val in ipairs(args["packages"]) do
+---    if type(val) == "string" then
+---        local name, version = string.match(val, "([^|]+)|([0-9]+)")
+---        if name and version then
+---            packages[name] = tonumber(version)
+---            cache:hget(name, "all")
+---        end
+---    end
+---end
+---
+---local res, err = cache:commit_pipeline()
+---if not res then
+---    ngx.log(ngx.ERR, "error: ", err)
+---    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+---end
+---
+---local data = {}
+---for _, val in ipairs(res) do
+---    if type(val) == "string" then
+---        val = cjson.decode(val)
+---        if packages[val["name"]] < val["version"] then
+---            data[#data + 1] = val
+---        end
+---    end
+---end
+---
+---ngx.say(cjson.encode(data))
