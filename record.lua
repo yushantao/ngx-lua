@@ -11,7 +11,6 @@ local cjson = require "cjson"
 local host = ngx.var.host
 local uri = ngx.var.uri
 local status = ngx.var.status
-local request_time = ngx.var.upstream_response_time
 local body_bytes_sent = ngx.var.body_bytes_sent
 ---- 请求次数统计, count
 local newval, err = result_domain_dict:incr(host, 1)
@@ -30,7 +29,6 @@ local status_code = tonumber(ngx.var.status)
 
 ---- uri 请求次数
 if string.find(uri,"(/api/)") then
----	if string.find([\u4e00-\u9fa5]) then
 --uri 请求总数-递增
 count_var=host..uri
 local request_uri = result_uri_sumcount_dict:get(uri) or 0
@@ -38,28 +36,30 @@ local request_uri = result_uri_sumcount_dict:get(uri) or 0
         if not newval and err == "not found" then
             result_uri_sumcount_dict:add(count_var, 0)
             result_uri_sumcount_dict:incr(count_var, 1)
-     	end
+        end
 ---uri 请求数量10s归零
 query_var=host..uri
 local request_uri = result_uri_count_dict:get(uri) or 0
         local newval, err = result_uri_count_dict:incr(query_var, 1)
         if not newval and err == "not found" then
-            result_uri_count_dict:add(query_var, 0,10)
+            result_uri_count_dict:add(query_var, 0,30)
             result_uri_count_dict:incr(query_var, 1)
-     	end
-
----- uri 请求总时间
-        request_time_var =host..uri
+        end
+---uri 请求总时间 10s归零
+local request_uri = result_reqtime_dict:get(uri) or 0
         local request_time = tonumber(ngx.var.upstream_response_time) or 0
-        local sum = result_reqtime_dict:get(request_time_var) or 0
-        sum = sum + request_time
-        result_reqtime_dict:set(request_time_var,sum,10)
+        local newval, err = result_reqtime_dict:incr(query_var, request_time)
+        if not newval and err == "not found" then
+            result_reqtime_dict:add(query_var, 0,30)
+            result_reqtime_dict:incr(query_var, request_time)
+        end
 ---- uri 平均请求时间
  request_avg_time = host..uri
- local avg =result_api_dict:get(request_avg_time) or 0
+ local avg =result_api_dict:get(query_var) or 0
  local count = result_uri_count_dict:get(query_var)
+ local sum = result_reqtime_dict:get(query_var)
      avg = sum/count
-     result_api_dict:set(request_avg_time,avg)
+     result_api_dict:set(query_var,avg,180)
 end
 
 ---- 传输字节
@@ -67,5 +67,5 @@ local body_bytes_sent = tonumber(ngx.var.body_bytes_sent)
 local sent = result_size_dict:get(body_bytes_sent) or 12
 body_byte_var = uri.."_body-byte"
 if body_bytes_sent >= 1048569 then
-	result_size_dict:set(body_byte_var,body_bytes_sent)
+    ngx.log(ngx.ERR, "gt than 1MB: ",body_byte_var)
 end

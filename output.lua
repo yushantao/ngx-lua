@@ -6,7 +6,6 @@ local uricount = {}
 ---local reqtime = {}
 local api = {}
 local latency = {}
-local size = {}
 local jstr
 local cjson = require "cjson"
 local result_status_dict = ngx.shared.result_status_dict
@@ -14,7 +13,6 @@ local result_domain_dict = ngx.shared.result_domain_dict
 local result_uri_count_dict = ngx.shared.result_uri_count_dict
 local result_reqtime_dict = ngx.shared.result_reqtime_dict
 local result_api_dict = ngx.shared.result_api_dict
-local result_size_dict = ngx.shared.result_size_dict
 local result_uri_sumcount_dict = ngx.shared.result_uri_sumcount_dict
 
 for k,v in pairs(result_status_dict:get_keys())do
@@ -34,15 +32,10 @@ end
 for k,v in pairs(result_api_dict:get_keys())do
   latency[v] = result_api_dict:get(v)
 end
-for k,v in pairs(result_size_dict:get_keys())do
-  size[v] = result_size_dict:get(v)
-end
   res["status"]= status
   res["domain"]= domain
-  res["reqtime"]= reqtime
   api["latency"]=latency
   api["count"]=uricount
   res["api"]=api
-  res["size"] = size
   jstr = cjson.encode(res)
   ngx.say(jstr)
