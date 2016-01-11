@@ -4,7 +4,6 @@ local result_reqtime_dict = ngx.shared.result_reqtime_dict
 local result_status_dict = ngx.shared.result_status_dict
 local result_domain_dict = ngx.shared.result_domain_dict
 local result_api_dict = ngx.shared.result_api_dict
-local result_size_dict = ngx.shared.result_size_dict
 local result_uri_sumcount_dict = ngx.shared.result_uri_sumcount_dict
 ---定义ngx变量 需要cjson支持
 local cjson = require "cjson"
@@ -28,7 +27,10 @@ local status_code = tonumber(ngx.var.status)
         end
 
 ---- uri 请求次数
-if string.find(uri,"(/api/)") then
+local a = string.find(uri,"(/api/)")
+local b = string.find(uri,".+%.(%w+)$")
+if a~=nil and b==nil then
+---if string.find(uri,"[^.]*") then
 --uri 请求总数-递增
 count_var=host..uri
 local request_uri = result_uri_sumcount_dict:get(uri) or 0
@@ -62,10 +64,3 @@ local request_uri = result_reqtime_dict:get(uri) or 0
      result_api_dict:set(query_var,avg,180)
 end
 
----- 传输字节
-local body_bytes_sent = tonumber(ngx.var.body_bytes_sent)
-local sent = result_size_dict:get(body_bytes_sent) or 12
-body_byte_var = uri.."_body-byte"
-if body_bytes_sent >= 1048569 then
-    ngx.log(ngx.ERR, "gt than 1MB: ",body_byte_var)
-end
