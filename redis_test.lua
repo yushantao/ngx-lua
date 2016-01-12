@@ -2,8 +2,11 @@
 local redis = require "resty.redis"
 local cjson = require "cjson"
 ---取关键字内容
-local args = ngx.req.get_headers()["Host"]
----取redis内容
+---local args = ngx.req.get_headers()["Host"]
+---local args = ngx.var.http_clientid
+---local args = ngx.var.http_uid
+---local args = ngx.var.http_accesstoken
+--取redis内容
 local red = redis.new()
 red:set_timeout(60000)
 local ok, err = red:connect("10.36.4.86", 6379)
